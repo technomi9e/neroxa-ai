@@ -1,57 +1,47 @@
+const API_KEY = "your_openai_api_key"; // <-- Replace this with your actual API key
+
 const chatMessages = document.getElementById("chat-messages");
 const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
-// Add message to the chat UI
-function addMessage(message, isUser) {
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", isUser ? "user" : "ai");
-  messageDiv.innerText = message;
-  chatMessages.appendChild(messageDiv);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+sendBtn.addEventListener("click", async () => {
+  const userText = userInput.value.trim();
+  if (!userText) return;
 
-// Show loading circle while AI is "typing"
-function showTyping() {
-  const typingDiv = document.createElement("div");
-  typingDiv.classList.add("message", "ai", "typing");
-  typingDiv.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
-  chatMessages.appendChild(typingDiv);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return typingDiv;
-}
-
-// Simulate AI reply (replace this with real API call)
-function getAIReply(userMessage) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const fakeResponse = `You said: "${userMessage}"`;
-      resolve(fakeResponse);
-    }, 1500);
-  });
-}
-
-// Send user message
-async function sendMessage() {
-  const message = userInput.value.trim();
-  if (message === "") return;
-
-  addMessage(message, true);
+  appendMessage("user", userText);
   userInput.value = "";
+  userInput.disabled = true;
+  sendBtn.disabled = true;
 
-  const typingDiv = showTyping();
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: userText }],
+      }),
+    });
 
-  const aiReply = await getAIReply(message);
-
-  typingDiv.remove();
-  addMessage(aiReply, false);
-}
-
-// Handle Enter key and send button
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
+    const data = await response.json();
+    const aiReply = data.choices?.[0]?.message?.content || "Sorry, no response.";
+    appendMessage("ai", aiReply);
+  } catch (error) {
+    appendMessage("ai", "Error: Failed to get response.");
+    console.error(error);
   }
+
+  userInput.disabled = false;
+  sendBtn.disabled = false;
 });
+
+function appendMessage(role, text) {
+  const message = document.createElement("div");
+  message.className = `message ${role}`;
+  message.textContent = text;
+  chatMessages.appendChild(message);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
