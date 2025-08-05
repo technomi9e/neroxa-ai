@@ -4,60 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Neroxa AI</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-      color: #333;
-    }
-    header {
-      background: #4a90e2;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    .container {
-      padding: 40px 20px;
-      max-width: 800px;
-      margin: auto;
-    }
-    .intro {
-      text-align: center;
-    }
-    .intro h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-    }
-    .intro p {
-      font-size: 1.2em;
-    }
-    footer {
-      text-align: center;
-      padding: 20px;
-      background: #222;
-      color: white;
-      margin-top: 40px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <header>
-    <h1>Neroxa AI</h1>
-    <p>Your Free AI Assistant for Web and Mobile</p>
-  </header>
-
   <div class="container">
-    <div class="intro">
-      <h1>Welcome to Neroxa AI</h1>
-      <p>Neroxa is your intelligent, always-available assistant. Designed to be simple, powerful, and completely free to use — both in browser and mobile apps.</p>
-      <p>Stay tuned! Our full version is under development.</p>
-    </div>
+    <aside class="sidebar">
+      <h2>Neroxa</h2>
+      <button id="new-chat">+ New Chat</button>
+    </aside>
+    <main class="chat-area">
+      <div id="chat-messages"></div>
+      <div class="input-area">
+        <textarea id="user-input" rows="1" placeholder="Send a message..."></textarea>
+        <button id="send-btn">➤</button>
+      </div>
+    </main>
   </div>
-
-  <footer>
-    &copy; 2025 Neroxa AI | Powered by Sadik
-  </footer>
+  <script src="script.js"></script>
 </body>
 </html>
