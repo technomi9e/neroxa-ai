@@ -1,73 +1,57 @@
-const sendBtn = document.getElementById("send-btn");
-const userInput = document.getElementById("user-input");
 const chatMessages = document.getElementById("chat-messages");
-const newChatBtn = document.getElementById("new-chat");
+const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
 
-const API_KEY = "YOUR_OPENAI_API_KEY_HERE"; // Replace this with your real key
-
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress", function (e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-newChatBtn.addEventListener("click", () => {
-  chatMessages.innerHTML = "";
-});
-
-function appendMessage(sender, message) {
+// Add message to the chat UI
+function addMessage(message, isUser) {
   const messageDiv = document.createElement("div");
-  messageDiv.className = `message ${sender}`;
+  messageDiv.classList.add("message", isUser ? "user" : "ai");
   messageDiv.innerText = message;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function showLoading() {
-  const loadingDiv = document.createElement("div");
-  loadingDiv.className = "message ai loading";
-  loadingDiv.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
-  chatMessages.appendChild(loadingDiv);
+// Show loading circle while AI is "typing"
+function showTyping() {
+  const typingDiv = document.createElement("div");
+  typingDiv.classList.add("message", "ai", "typing");
+  typingDiv.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
+  chatMessages.appendChild(typingDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
-  return loadingDiv;
+  return typingDiv;
 }
 
+// Simulate AI reply (replace this with real API call)
+function getAIReply(userMessage) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const fakeResponse = `You said: "${userMessage}"`;
+      resolve(fakeResponse);
+    }, 1500);
+  });
+}
+
+// Send user message
 async function sendMessage() {
   const message = userInput.value.trim();
-  if (!message) return;
+  if (message === "") return;
 
-  appendMessage("user", message);
+  addMessage(message, true);
   userInput.value = "";
 
-  const loadingDiv = showLoading();
+  const typingDiv = showTyping();
 
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: message }],
-      }),
-    });
+  const aiReply = await getAIReply(message);
 
-    const data = await response.json();
-    loadingDiv.remove();
-
-    if (data.choices && data.choices.length > 0) {
-      const aiMessage = data.choices[0].message.content;
-      appendMessage("ai", aiMessage);
-    } else {
-      appendMessage("ai", "Sorry, I didn’t get that.");
-    }
-  } catch (error) {
-    loadingDiv.remove();
-    appendMessage("ai", "Error talking to AI. Check API key.");
-    console.error(error);
-  }
+  typingDiv.remove();
+  addMessage(aiReply, false);
 }
+
+// Handle Enter key and send button
+sendBtn.addEventListener("click", sendMessage);
+userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
